@@ -1,0 +1,27 @@
+type: object
+properties:
+  port_id: 
+    type: string
+  repetition:
+    type: integer
+    minimum: 0
+  timestamp:
+    type: time
+  data:
+    type: array
+    items:
+      type: object
+      properties:
+        lane_index:
+            type: integer
+            minimum: 0
+            maximum: 7
+        prbs_total_bits:
+          type: integer
+          minimum: 1
+        prbs_total_errors:
+          type: integer
+          minimum: 0
+        prbs_bit_error_rate:
+          type: number
+          minimum: 0
