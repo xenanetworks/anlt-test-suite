@@ -393,7 +393,7 @@ async def pam4_preset_framelock(
         should_do_lt=True,
         should_lt_interactive=True,
         an_allow_loopback=False,
-        lt_preset0=enums.FreyaOutOfSyncPreset.IEEE,
+        lt_preset0=enums.FreyaOutOfSyncPreset.CURRENT,
         lt_initial_modulations={},
         lt_algorithm={},
         should_enable_lt_timeout=False
