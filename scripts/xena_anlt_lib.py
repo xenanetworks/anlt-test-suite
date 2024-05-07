@@ -11,8 +11,8 @@ from type import *
 #region high-level functions
 
 async def change_module_media(
-    chassis_ip: str,
-    module_id: int,
+    tester: testers.L23Tester,
+    module: FREYA_MODULE_UNION,
     username: str,
     module_media: enums.MediaConfigurationType,
     port_count: int,
@@ -23,48 +23,43 @@ async def change_module_media(
     """
 
     # To do the module reconfiguration
-    async with testers.L23Tester(chassis_ip, username) as tester:
+    logger.info(f"#########################################")
+    logger.info(f"Chassis:        {tester.info.host}")
+    logger.info(f"Username:       {username}")
+    logger.info(f"Module:         {module.module_id}")
+    logger.info(f"#########################################")
 
-        logger.info(f"#########################################")
-        logger.info(f"Chassis:        {chassis_ip}")
-        logger.info(f"Username:       {username}")
-        logger.info(f"Module:         {module_id}")
-        logger.info(f"#########################################")
+    logger.info(f"Configuring module {module.module_id} to:")
+    logger.info(f"    Media configuration: {module_media.name}")
+    logger.info(f"    Port configuration: {port_count}x{port_speed}G")
 
-        logger.info(f"Configuring module {module_id} to:")
-        logger.info(f"    Media configuration: {module_media.name}")
-        logger.info(f"    Port configuration: {port_count}x{port_speed}G")
+    # the module must be a freya module
+    if not isinstance(module, FREYA_MODULE_UNION):
+        logger.warning(f"The module is not a Freya module")
+        logger.warning(f"Abort")
+        return None
 
-        # access module 0 on the tester
-        module = tester.modules.obtain(module_id)
+    # module reservation
+    logger.info(f"Reserve module")
+    await mgmt.free_tester(tester=tester)
+    await mgmt.free_module(module, should_free_ports=True)
+    await mgmt.reserve_module(module)
+    logger.info(f"----")
 
-        # the module must be a freya module
-        if not isinstance(module, FREYA_MODULE_UNION):
-            logger.warning(f"The module is not a Freya module")
-            logger.warning(f"Abort")
-            return None
+    # change module media
+    logger.info(f"Change module media to {module_media.name}")
+    await module.media.set(media_config=module_media)
+    logger.info(f"----")
 
-        # module reservation
-        logger.info(f"Reserve module")
-        await mgmt.free_tester(tester=tester)
-        await mgmt.free_module(module, should_free_ports=True)
-        await mgmt.reserve_module(module)
-        logger.info(f"----")
+    # Change module's port config
+    speeds = [port_count]
+    speeds.extend([port_speed * 1000] * port_count)
+    logger.info(f"Change module port config to {speeds}")
+    await module.cfp.config.set(portspeed_list=speeds)
+    logger.info(f"----")
 
-        # change module media
-        logger.info(f"Change module media to {module_media.name}")
-        await module.media.set(media_config=module_media)
-        logger.info(f"----")
-
-        # Change module's port config
-        speeds = [port_count]
-        speeds.extend([port_speed * 1000] * port_count)
-        logger.info(f"Change module port config to {speeds}")
-        await module.cfp.config.set(portspeed_list=speeds)
-        logger.info(f"----")
-
-        await mgmt.free_module(module, should_free_ports=True)
-        logger.info(f"Module media change done")
+    await mgmt.free_module(module, should_free_ports=True)
+    logger.info(f"Module media change done")
 
 
 async def verify_frame_lock_both_sides(
@@ -72,7 +67,7 @@ async def verify_frame_lock_both_sides(
     serdes: int,
     logger: logging.Logger,
     timeout: int = 20,
-    ) -> bool:
+    ):
     """Verify that both the exerciser and the DUT port are able to detect frame lock
     """
     # get the connection, module index, and port index from the port object
@@ -104,7 +99,7 @@ async def verify_frame_lock_both_sides(
     # if still false after timeout loops, report the error and return false
     logger.warning(f"Frame Lock NOT detected on either end")
     logger.warning(f"Local: {enums.LinkTrainFrameLock(_local).name}. Remote: {enums.LinkTrainFrameLock(_remote).name}")
-    return False
+    raise Exception(f"Local frame lock: {enums.LinkTrainFrameLock(_local).name}. Remote frame lock: {enums.LinkTrainFrameLock(_remote).name}")
 
 
 async def verify_an_good_check(
@@ -412,10 +407,11 @@ async def pam4_preset_framelock(
             return False
 
     # 2. verify that both ends see Frame Lock
-    frame_lock_detected = await verify_frame_lock_both_sides(
-        port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
-    )
-    if not frame_lock_detected:
+    try:
+        frame_lock_detected = await verify_frame_lock_both_sides(
+            port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
+        )
+    except:
         await abort_test(port, logger)
         return False
 
@@ -429,10 +425,11 @@ async def pam4_preset_framelock(
         return False
 
     # 4. verify that both ends see Frame Lock
-    frame_lock_detected = await verify_frame_lock_both_sides(
-        port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
-    )
-    if not frame_lock_detected:
+    try:
+        frame_lock_detected = await verify_frame_lock_both_sides(
+            port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
+        )
+    except:
         await abort_test(port, logger)
         return False
     
@@ -446,10 +443,11 @@ async def pam4_preset_framelock(
         return False
 
     # 6. verify that both ends see Frame Lock
-    frame_lock_detected = await verify_frame_lock_both_sides(
-        port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
-    )
-    if not frame_lock_detected:
+    try:
+        frame_lock_detected = await verify_frame_lock_both_sides(
+            port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
+        )
+    except:
         await abort_test(port, logger)
         return False
 
