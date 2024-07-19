@@ -16,7 +16,7 @@ async def main():
             tester=tester,
             module=module,
             username="xoa",
-            module_media=enums.MediaConfigurationType.QSFPDD800,
+            module_media=enums.MediaConfigurationType.QSFPDD800_ANLT,
             port_count=8,
             port_speed=100,
             logger=logger
