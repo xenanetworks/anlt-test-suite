@@ -8,11 +8,12 @@ CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"
 DUT_PORT = "6/0"
 SERDES = 1
-COEFF = "PRE3"
+COEFF = "pre3"
 PRESET = 1
 SIMULATED_DUT = False
+TYPE = "max"
 
-async def main(chassis: str, test_port_str: str, dut_port_str: str, serdes: int, preset: int, coeff: str, simulate_dut: bool):
+async def main(chassis: str, test_port_str: str, dut_port_str: str, serdes: int, preset: int, coeff: str, simulate_dut: bool, test_type: str):
     # configure basic logger
     logger = logging.getLogger(__name__)
     logging.basicConfig(
@@ -29,15 +30,7 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, serdes: int,
     _pid_dut = int(dut_port_str.split("/")[1])
 
     if simulate_dut:
-        await start_anlt_on_dut(
-            chassis_ip=chassis,
-            module_id=_mid_dut,
-            port_id=_pid_dut,
-            username="sim_dut",
-            should_link_recovery=False,
-            should_an=False,
-            logger=logger
-        )
+        await start_anlt_on_dut(chassis_ip=chassis, module_id=_mid_dut, port_id=_pid_dut, username="sim_dut", should_link_recovery=False, should_an=False, logger=logger)
 
     await coeff_boundary_max_min_limit_test(
         chassis_ip=chassis,
@@ -48,7 +41,7 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, serdes: int,
         should_an=False,
         preset=preset,
         coeff=enums.LinkTrainCoeffs[coeff.upper()],
-        type="max",
+        type=test_type,
         serdes=serdes,
         logger=logger,
         an_good_check_retries=20,
@@ -56,13 +49,7 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, serdes: int,
     )
 
     if simulate_dut:
-        await stop_anlt_on_dut(
-            chassis_ip=chassis,
-            module_id=_mid_dut,
-            port_id=_pid_dut,
-            username="sim_dut",
-            logger=logger
-        )
+        await stop_anlt_on_dut(chassis_ip=chassis, module_id=_mid_dut, port_id=_pid_dut, username="sim_dut", logger=logger)
 
 
 if __name__ == "__main__":
@@ -73,5 +60,6 @@ if __name__ == "__main__":
         serdes = SERDES,
         preset = PRESET,
         coeff = COEFF,
-        simulate_dut=SIMULATED_DUT
+        simulate_dut=SIMULATED_DUT,
+        test_type = TYPE
         ))

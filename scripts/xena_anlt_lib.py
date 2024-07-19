@@ -609,6 +609,7 @@ async def coeff_boundary_max_min_limit_test(
     frame_lock_retries: int,
 ) -> bool:
 
+    type = type.lower()
     # connect to chassis, reserve and reset the Xena port
     port = await connect_reserver_reset(chassis_ip, module_id, port_id, username, logger)
     if not isinstance(port, FREYA_PORT_UNION):
