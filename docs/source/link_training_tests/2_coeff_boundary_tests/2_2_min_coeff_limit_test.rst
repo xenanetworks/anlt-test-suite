@@ -33,14 +33,10 @@ AN Phase:
 LT Phase:
 
 3. Request the remote transmitter to use ``preset`` on each specified Serdes.
-4. Request the remote transmitter to **decrease coefficient** by 1 on each specified Serdes.
-5. If the response is ``EQ AT LIMIT`` or ``COEFF AND EQ AT LIMIT``:
-
-  * If current tap is main, **increase pre** and repeat 4.
-  * If current tap is not main, **increase main** and repeat 4.
-
-6. Else repeat this step until the response is ``COEFF AT LIMIT``.
-7. Report the last response on each specified Serdes.
+4. Request the remote transmitter to **decrease coefficient** on each specified Serdes.
+5. If the response is ``COEFF AT LIMIT`` or ``COEFF NOT SUPPORTED``, then test is OK.
+6. If the response is  ``EQ AT LIMIT`` or ``COEFF EQ AT LIMIT`` or frame lock is lost, then the test is failed.
+7. Report the response on each specified Serdes.
 8. Repeat 3-7 until all coefficients are tested.
 
 .. note::

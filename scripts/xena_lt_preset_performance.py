@@ -1,7 +1,16 @@
+###############################################################
+#                                                             #
+#               PRESET TEST - LINK PERFORMANCE TEST           #
+#                                                             #
+# Objective                                                   #
+# To measure the link training BER performances of the remote #
+# transmitter using the specified preset.                     #
+#                                                             #
+###############################################################
+
 import asyncio
 import logging
 from xena_anlt_lib import start_anlt_on_dut, preset_performance, stop_anlt_on_dut
-import sys
 
 CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"

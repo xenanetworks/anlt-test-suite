@@ -1,15 +1,23 @@
+###############################################################
+#                                                             #
+#       COEFFICIENT BOUNDARY TEST - MAX/MIN LIMIT TEST        #
+#                                                             #
+# Objective                                                   #
+# To measure the frame lock status of the remote transmitter  #
+# using the specified preset.                                 #
+#                                                             #
+###############################################################
 import asyncio
 import logging
 from xena_anlt_lib import coeff_boundary_max_min_limit_test, start_anlt_on_dut, stop_anlt_on_dut
 from xoa_driver import enums
-import sys
 
 CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"
 DUT_PORT = "6/0"
 SERDES = 1
-COEFF = "pre3"
-PRESET = 1
+COEFF = "main"
+PRESET = 3
 SIMULATED_DUT = False
 TYPE = "max"
 

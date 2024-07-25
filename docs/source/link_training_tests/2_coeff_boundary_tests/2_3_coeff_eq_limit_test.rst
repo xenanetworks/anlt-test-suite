@@ -33,9 +33,9 @@ AN Phase:
 LT Phase:
 
 3.	Request the remote transmitter to use preset on each ``specified`` Serdes.
-4.	Request the remote transmitter to **increase coefficient by 1** on each specified Serdes.
-5.	Repeat this step until the response is ``COEFF EQ AT LIMIT`` or ``COEFF AT LIMIT`` or ``EQ AT LIMIT``.
-6.	Report the last response on each specified Serdes.
+4.	Request the remote transmitter to **increase coefficient** on each specified Serdes.
+5.	Repeat this step until the response is ``COEFF EQ AT LIMIT`` or ``COEFF AT LIMIT`` or ``EQ AT LIMIT`` or ``COEFF NOT SUPPORTED``.
+6.	Report the response on each specified Serdes.
 7.	Repeat 3-6 until all coefficients are tested.
 
 .. note::
