@@ -1,18 +1,14 @@
 import asyncio
 from xoa_driver import testers, modules, ports, enums
-from typing import Generator, Optional, Union, List, Dict, Any
 from xoa_driver.hlfuncs import mgmt, anlt
-from xoa_driver.lli import commands
 import logging
 from contextlib import suppress
-import time
-from type import *
 
 #region high-level functions
 
 async def change_module_media(
     tester: testers.L23Tester,
-    module: FREYA_MODULE_UNION,
+    module: modules.Z800FreyaModule,
     username: str,
     module_media: enums.MediaConfigurationType,
     port_count: int,
@@ -34,7 +30,7 @@ async def change_module_media(
     logger.info(f"    Port configuration: {port_count}x{port_speed}G")
 
     # the module must be a freya module
-    if not isinstance(module, FREYA_MODULE_UNION):
+    if not isinstance(module, modules.Z800FreyaModule):
         logger.warning(f"The module is not a Freya module")
         logger.warning(f"Abort")
         return None
@@ -63,7 +59,7 @@ async def change_module_media(
 
 
 async def verify_frame_lock_both_sides(
-    port: FreyaPortType,
+    port: ports.Z800FreyaPort,
     serdes: int,
     logger: logging.Logger,
     timeout: int = 20,
@@ -71,7 +67,7 @@ async def verify_frame_lock_both_sides(
     """Verify that both the exerciser and the DUT port are able to detect frame lock
     """
     # get the connection, module index, and port index from the port object
-    conn, mid, pid = anlt.get_ctx(port)
+    # conn, mid, pid = anlt.get_ctx(port)
     logger.info(f"Verifying LT Frame Lock on both ends")
 
     # set flag to default
@@ -81,7 +77,8 @@ async def verify_frame_lock_both_sides(
     # start timeout loops
     for _ in range(timeout):
         # read LT frame lock status of both local and remote
-        lt_info = await commands.PL1_LINKTRAININFO(conn, mid, pid, serdes, 0).get()
+        lt_info = await port.l1.serdes[serdes].lt_info.get()
+        # lt_info = await commands.PL1_LINKTRAININFO(conn, mid, pid, serdes, 0).get()
         _local = lt_info.frame_lock
         _remote = lt_info.remote_frame_lock
 
@@ -103,20 +100,21 @@ async def verify_frame_lock_both_sides(
 
 
 async def verify_an_good_check(
-    port: FreyaPortType,
+    port: ports.Z800FreyaPort,
     logger: logging.Logger,
     timeout: int = 10,
     ) -> bool:
     """Check if Auto-Negotiation status is AN_GOOD_CHECK
     """
     # get the connection, module index, and port index from the port object
-    conn, mid, pid = anlt.get_ctx(port)
+    # conn, mid, pid = anlt.get_ctx(port)
     logger.info(f"Verifying AN status on Xena port (must be AN_GOOD_CHECK)")
 
     # start timeout loops
     for _ in range(timeout):
         # read AN status
-        resp = await commands.PL1_AUTONEG_STATUS(conn, mid, pid).get()
+        resp = await port.l1.anlt.an.status.get()
+        # resp = await commands.PL1_AUTONEG_STATUS(conn, mid, pid).get()
         
         # if AN status is AN_GOOD_CHECK, return true
         if resp.autoneg_state == enums.AutoNegStatus.AN_GOOD_CHECK:
@@ -153,7 +151,7 @@ async def start_anlt_on_dut(
         module = tester.modules.obtain(module_id)
 
         # the module must be a freya module
-        if not isinstance(module, FREYA_MODULE_UNION):
+        if not isinstance(module, modules.Z800FreyaModule):
             logger.warning(f"The module is not a Freya module")
             logger.warning(f"Abort")
             return None
@@ -236,7 +234,7 @@ async def stop_anlt_on_dut(
         module = tester.modules.obtain(module_id)
 
         # the module must be a freya module
-        if not isinstance(module, FREYA_MODULE_UNION):
+        if not isinstance(module, modules.Z800FreyaModule):
             logger.warning(f"The module is not a Freya module")
             logger.warning(f"Abort")
             return None
@@ -269,7 +267,7 @@ async def stop_anlt_on_dut(
 
 
 async def abort_test(
-        port: FreyaPortType,
+        port: ports.Z800FreyaPort,
         logger: logging.Logger, 
         ):
     """Stop ANLT on a port and release the port
@@ -305,7 +303,7 @@ async def connect_reserver_reset(
     module = tester.modules.obtain(module_id)
 
     # the module must be a freya module
-    if not isinstance(module, FREYA_MODULE_UNION):
+    if not isinstance(module, modules.Z800FreyaModule):
         return None
 
     # resp = await module.media.get()
@@ -329,7 +327,7 @@ async def connect_reserver_reset(
 
 
 async def reset_freya_port_tx_tap(
-    port: FreyaPortType,
+    port: ports.Z800FreyaPort,
     logger: logging.Logger,
     ):
     """Reset Xena port Tx tap values
@@ -348,7 +346,7 @@ async def reset_freya_port_tx_tap(
 
 
 async def reset_dut_port_tx_tap(
-    port: FreyaPortType,
+    port: ports.Z800FreyaPort,
     serdes_idx: int,
     logger: logging.Logger,
     ):
@@ -367,7 +365,7 @@ async def reset_dut_port_tx_tap(
 
 async def pam4_preset_framelock(
     logger: logging.Logger,
-    port: FreyaPortType,
+    port: ports.Z800FreyaPort,
     should_link_recovery: bool,
     should_an: bool,
     preset: int,
@@ -408,9 +406,7 @@ async def pam4_preset_framelock(
 
     # 2. verify that both ends see Frame Lock
     try:
-        frame_lock_detected = await verify_frame_lock_both_sides(
-            port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
-        )
+        await verify_frame_lock_both_sides(port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries)
     except:
         await abort_test(port, logger)
         return False
@@ -426,9 +422,7 @@ async def pam4_preset_framelock(
 
     # 4. verify that both ends see Frame Lock
     try:
-        frame_lock_detected = await verify_frame_lock_both_sides(
-            port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
-        )
+        await verify_frame_lock_both_sides(port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries)
     except:
         await abort_test(port, logger)
         return False
@@ -444,9 +438,7 @@ async def pam4_preset_framelock(
 
     # 6. verify that both ends see Frame Lock
     try:
-        frame_lock_detected = await verify_frame_lock_both_sides(
-            port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries
-        )
+        await verify_frame_lock_both_sides(port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries)
     except:
         await abort_test(port, logger)
         return False
@@ -470,7 +462,7 @@ async def preset_frame_lock(
     
     # connect to chassis, reserve and reset the Xena port
     port = await connect_reserver_reset(chassis_ip, module_id, port_id, username, logger)
-    if not isinstance(port, FREYA_PORT_UNION):
+    if not isinstance(port, ports.Z800FreyaPort):
         logger.info(f"Non-Freya port is used. Aborted")
         return False
     
@@ -521,7 +513,7 @@ async def preset_performance(
 
     # connect to chassis, reserve and reset the Xena port
     port = await connect_reserver_reset(chassis_ip, module_id, port_id, username, logger)
-    if not isinstance(port, FREYA_PORT_UNION):
+    if not isinstance(port, ports.Z800FreyaPort):
         logger.info(f"Non-Freya port is used. Aborted")
         return False
     
@@ -612,7 +604,7 @@ async def coeff_boundary_max_min_limit_test(
     type = type.lower()
     # connect to chassis, reserve and reset the Xena port
     port = await connect_reserver_reset(chassis_ip, module_id, port_id, username, logger)
-    if not isinstance(port, FREYA_PORT_UNION):
+    if not isinstance(port, ports.Z800FreyaPort):
         logger.info(f"Non-Freya port is used. Aborted")
         return False
     
@@ -688,7 +680,7 @@ async def coeff_boundary_max_min_limit_test(
             result = False
             break
             
-            # # reverse the previous action
+            # reverse the previous action
             # if type == "max":
             #     logger.warning(f"Request dec on {coeff.name.upper()} (reverse prev action)")
             # else:
@@ -744,7 +736,7 @@ async def coeff_boundary_coeff_eq_limit_test(
 
     # connect to chassis, reserve and reset the Xena port
     port = await connect_reserver_reset(chassis_ip, module_id, port_id, username, logger)
-    if not isinstance(port, FREYA_PORT_UNION):
+    if not isinstance(port, ports.Z800FreyaPort):
         logger.info(f"Non-Freya port is used. Aborted")
         return False
     

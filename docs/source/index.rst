@@ -1,5 +1,5 @@
 =====================================================
-Xena OpenAutomation ANLT Test Suite
+Xena ANLT Test Suite
 =====================================================
 
 This documentation specifies ANLT Test Suite.
@@ -11,7 +11,6 @@ This documentation specifies ANLT Test Suite.
     :caption: Table of Content
 
     introduction
-    autoneg_tests/index
     link_training_tests/index
 
 

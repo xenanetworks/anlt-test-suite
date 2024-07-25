@@ -1,8 +1,17 @@
+###############################################################
+#                                                             #
+#     COEFFICIENT BOUNDARY TEST - COEFF & EQ LIMIT TEST       #
+#                                                             #
+# Objective                                                   #
+# To measure the frame lock status of the remote transmitter  #
+# using the specified preset.                                 #
+#                                                             #
+###############################################################
+
 import asyncio
 import logging
 from xena_anlt_lib import coeff_boundary_coeff_eq_limit_test, start_anlt_on_dut, stop_anlt_on_dut
 from xoa_driver import enums
-import sys
 
 CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"

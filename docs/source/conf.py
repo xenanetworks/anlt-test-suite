@@ -43,10 +43,10 @@ def get_short_version(rel_path):
 
 # -- Project information -----------------------------------------------------
 
-project = u'ANLT Test Suite'
+project = u'Xena ANLT Test Suite'
 copyright = u'2024, Teledyne LeCroy'
 author = u'Teledyne LeCroy'
-title = u'ANLT Test Suite'
+title = u'Xena ANLT Test Suite'
 
 # The full version, including alpha/beta/rc tags.
 release = get_version("../../scripts/__init__.py")
@@ -148,7 +148,7 @@ autosectionlabel_prefix_document = True
 html_theme = 'furo'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'anlt_test_suite_doc'
+htmlhelp_basename = 'xena_anlt_test_suite_doc'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -200,7 +200,7 @@ intersphinx_disabled_domains = ['std']
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'anlt_test_suite_doc', title, author, 'anlt_test_suite_doc', 'Xena OpenAutomation ANLT Test Suite', 'Miscellaneous'),
+    (master_doc, 'xena_anlt_test_suite_doc', title, author, 'xena_anlt_test_suite_doc', 'Xena ANLT Test Suite', 'Miscellaneous'),
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -228,7 +228,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [(master_doc, 'anlt_test_suite_doc.tex', title, author, 'manual'),
+latex_documents = [(master_doc, 'xena_anlt_test_suite_doc.tex', title, author, 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -240,7 +240,7 @@ latex_logo = './_static/pdf_logo.png'
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'anlt_test_suite_doc', title, [author], 1)
+    (master_doc, 'xena_anlt_test_suite_doc', title, [author], 1)
 ]
 
 
@@ -250,7 +250,7 @@ epub_author = author
 epub_publisher = 'https://xenanetworks.com'
 epub_copyright = copyright
 epub_show_urls = 'footnote'
-epub_basename = 'anlt_test_suite_doc'
+epub_basename = 'xena_anlt_test_suite_doc'
 
 # Remove auto-generated API docs from sidebars. They take too long to build.
 remove_from_toctrees = ["api_doc/_autosummary/*"]
