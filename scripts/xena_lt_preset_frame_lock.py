@@ -49,7 +49,8 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, serdes: int,
         preset=preset,
         serdes=serdes,
         an_good_check_retries=20,
-        frame_lock_retries=10
+        frame_lock_retries=10,
+        should_pam4pre=False
     )
 
     if simulate_dut:

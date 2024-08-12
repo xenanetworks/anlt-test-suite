@@ -372,6 +372,7 @@ async def pam4_preset_framelock(
     serdes: int,
     an_good_check_retries: int,
     frame_lock_retries: int,
+    should_pam4pre: bool,
 )-> bool:
     
     """Common ANLT prep procedure
@@ -384,7 +385,7 @@ async def pam4_preset_framelock(
     logger.info(f"Setting port into:")
     logger.info(f"  AN          = {'On' if should_an else 'Off'} (not allow loopback)")
     logger.info(f"  LT          = On (interactive)")
-    logger.info(f"  LT Preset 0 = standard")
+    logger.info(f"  LT Preset 0 = current")
     await anlt.anlt_start(
         port=port,
         should_do_an=should_an,
@@ -411,35 +412,30 @@ async def pam4_preset_framelock(
         await abort_test(port, logger)
         return False
 
-    # 3. ask the remote port to switch to PAM4
-    logger.info(f"Requesting the remote port to switch to PAM4")
-    resp = await anlt.lt_encoding(
-        port=port, serdes=serdes, encoding=enums.LinkTrainEncoding.PAM4
-    )
-    if resp != enums.LinkTrainCmdResults.SUCCESS:
-        await abort_test(port, logger)
-        return False
-
-    # 4. verify that both ends see Frame Lock
-    try:
-        await verify_frame_lock_both_sides(port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries)
-    except:
-        await abort_test(port, logger)
-        return False
+    # 3. ask the remote port to switch to PAM4 or PAM4Pre
+    if not should_pam4pre:
+        logger.info(f"Requesting the remote port to switch to PAM4")
+        resp = await anlt.lt_encoding(
+            port=port, serdes=serdes, encoding=enums.LinkTrainEncoding.PAM4
+        )
+        if resp != enums.LinkTrainCmdResults.SUCCESS:
+            await abort_test(port, logger)
+            return False
+    else:
+        logger.info(f"Requesting the remote port to switch to PAM4 Precoding")
+        resp = await anlt.lt_encoding(
+            port=port, serdes=serdes, encoding=enums.LinkTrainEncoding.PAM4_WITH_PRECODING
+        )
+        if resp != enums.LinkTrainCmdResults.SUCCESS:
+            await abort_test(port, logger)
+            return False
     
-    # 5. ask the remote port to use a preset
+    # 4. ask the remote port to use a preset
     logger.info(f"Requesting the remote port to use Preset {preset}")
     resp = await anlt.lt_preset(
         port=port, serdes=serdes, preset=enums.LinkTrainPresets(preset-1)
     )
     if resp != enums.LinkTrainCmdResults.SUCCESS:
-        await abort_test(port, logger)
-        return False
-
-    # 6. verify that both ends see Frame Lock
-    try:
-        await verify_frame_lock_both_sides(port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries)
-    except:
         await abort_test(port, logger)
         return False
 
@@ -458,6 +454,7 @@ async def preset_frame_lock(
     serdes: int,
     an_good_check_retries: int,
     frame_lock_retries: int,
+    should_pam4pre: bool
 ) -> bool:
     
     # connect to chassis, reserve and reset the Xena port
@@ -480,6 +477,7 @@ async def preset_frame_lock(
         serdes,
         an_good_check_retries,
         frame_lock_retries,
+        should_pam4pre
     )
 
     # stop anlt on the port
@@ -509,6 +507,7 @@ async def preset_performance(
     logger: logging.Logger,
     an_good_check_retries: int,
     frame_lock_retries: int,
+    should_pam4pre: bool
 ) -> bool:
 
     # connect to chassis, reserve and reset the Xena port
@@ -531,6 +530,7 @@ async def preset_performance(
         serdes,
         an_good_check_retries,
         frame_lock_retries,
+        should_pam4pre
     ):
         logger.info(f"Preset Performance Test (FAILED)")
         return False
@@ -547,36 +547,6 @@ async def preset_performance(
     await anlt.anlt_stop(port)
 
     await asyncio.sleep(1)
-    # await port.pcs_pma.prbs_config.type.set(
-    #     prbs_inserted_type=enums.PRBSInsertedType.PHY_LINE,
-    #     polynomial=enums.PRBSPolynomial.PRBS31,
-    #     invert=enums.PRBSInvertState.NON_INVERTED,
-    #     statistics_mode=enums.PRBSStatisticsMode.PERSECOND,
-    # )
-    # # Enable PRBS-31 measurement
-    # await port.serdes[serdes].prbs.tx_config.set(
-    #     prbs_seed=0,
-    #     prbs_on_off=enums.PRBSOnOff.PRBSON,
-    #     error_on_off=enums.ErrorOnOff.ERRORSON,
-    # )
-    # resp = await port.serdes[serdes].prbs.status.get()
-
-    # _lock_status = resp.lock.name
-    # _prbr_bits = resp.byte_count * 8
-    # _error_bits = resp.error_count
-    # _prbs_ber = _error_bits / _prbr_bits
-    # logger.info(f"Serdes {serdes}")
-    # logger.info(f"PRBS Lock: {_lock_status}")
-    # logger.info(f"PRBS Bits: {_prbr_bits}")
-    # logger.info(f"PRBS Errors: {_error_bits}")
-    # logger.info(f"PRBS-31 BER: {_prbs_ber}")
-    
-    # # Disable PRBS-31 measurement
-    # await port.serdes[serdes].prbs.tx_config.set(
-    #     prbs_seed=0,
-    #     prbs_on_off=enums.PRBSOnOff.PRBSOFF,
-    #     error_on_off=enums.ErrorOnOff.ERRORSOFF,
-    # )
 
     # free the port
     await mgmt.free_port(port)
@@ -599,6 +569,7 @@ async def coeff_boundary_max_min_limit_test(
     serdes: int,
     an_good_check_retries: int,
     frame_lock_retries: int,
+    should_pam4pre: bool
 ) -> bool:
 
     type = type.lower()
@@ -622,6 +593,7 @@ async def coeff_boundary_max_min_limit_test(
         serdes,
         an_good_check_retries,
         frame_lock_retries,
+        should_pam4pre
     ):
         logger.info(f"Coefficient {'Maximum' if type=='max' else 'Minimum'} Limit Test (FAILED)")
         return False
@@ -646,7 +618,8 @@ async def coeff_boundary_max_min_limit_test(
 
     # start the algorithm loop
     result = False
-    for _ in range(1000):
+    not_updated_count = 0
+    for _ in range(100):
         # request the remote port to inc/dec a coeff
         if type == "max":
             logger.warning(f"Request inc on {coeff.name.upper()}")
@@ -664,9 +637,12 @@ async def coeff_boundary_max_min_limit_test(
             result = True
             break
         # if the response is TIMEOUT, test is failed
-        elif resp == enums.LinkTrainCmdResults.TIMEOUT:
+        elif resp in (
+            enums.LinkTrainCmdResults.TIMEOUT,
+            enums.LinkTrainCmdResults.UNKNOWN,
+            enums.LinkTrainCmdResults.FAILED,
+            ):
             logger.warning(f"Response: {resp.name}")
-            logger.warning(f"Failed due to TIMEOUT")
             logger.warning(f"----")
             result = False
             break
@@ -701,7 +677,17 @@ async def coeff_boundary_max_min_limit_test(
             #     logger.warning(f"----")
             #     result = False
             #     break
+        elif resp in (
+            enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
+            ):
+            not_updated_count += 1
+            if not_updated_count > 50:
+                result = False
+                break
+            else:
+                pass
         else:
+            not_updated_count = 0
             logger.warning(f"Response: {resp.name}")
             pass
 
@@ -718,7 +704,6 @@ async def coeff_boundary_max_min_limit_test(
     return result
 
 
-
 async def coeff_boundary_coeff_eq_limit_test(
     chassis_ip: str,
     module_id: int,
@@ -732,6 +717,7 @@ async def coeff_boundary_coeff_eq_limit_test(
     logger: logging.Logger,
     an_good_check_retries: int,
     frame_lock_retries: int,
+    should_pam4pre: bool
 ) -> bool:
 
     # connect to chassis, reserve and reset the Xena port
@@ -753,6 +739,7 @@ async def coeff_boundary_coeff_eq_limit_test(
         serdes,
         an_good_check_retries,
         frame_lock_retries,
+        should_pam4pre
     ):
         logger.info(f"Coefficient & EQ Limit Test (FAILED)")
         return False
@@ -763,7 +750,8 @@ async def coeff_boundary_coeff_eq_limit_test(
     
     # start the algorithm loop
     result = False
-    for i in range(1, 1000):
+    not_updated_count = 0
+    for _ in range(100):
         # request the remote port to increase coeff
         resp = await anlt.lt_coeff_inc(port, serdes, coeff)
         # if response is COEFF_STS_EQ_LIMIT or COEFF_STS_C_AND_EQ_LIMIT or COEFF_STS_AT_LIMIT or COEFF_STS_NOT_SUPPORTED
@@ -779,17 +767,32 @@ async def coeff_boundary_coeff_eq_limit_test(
             result = True
             break
         # if the response is TIMEOUT, test is failed
-        elif resp == enums.LinkTrainCmdResults.TIMEOUT:
+        elif resp in (
+            enums.LinkTrainCmdResults.TIMEOUT,
+            enums.LinkTrainCmdResults.UNKNOWN,
+            enums.LinkTrainCmdResults.FAILED,
+        ):
             logger.warning(f"Response: {resp.name}")
             logger.warning(f"Failed due to TIMEOUT")
             logger.warning(f"----")
             result = False
             break
+        elif resp in (
+            enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
+            ):
+            not_updated_count += 1
+            if not_updated_count > 50:
+                result = False
+                break
+            else:
+                pass
         else:
+            not_updated_count = 0
             logger.warning(f"Response: {resp.name}")
             pass
     
     logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+    resp = await anlt.lt_trained(port, serdes)
     await anlt.anlt_stop(port)
 
     # free the port

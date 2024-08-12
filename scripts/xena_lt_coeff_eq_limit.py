@@ -17,7 +17,7 @@ CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"
 DUT_PORT = "6/0"
 SERDES = 1
-COEFF = "pre3"
+COEFF = "pre2"
 PRESET = 1
 SIMULATED_DUT = False
 
@@ -52,7 +52,8 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, serdes: int,
         serdes=serdes,
         preset=preset,
         an_good_check_retries=20,
-        frame_lock_retries=10
+        frame_lock_retries=10,
+        should_pam4pre=False
     )
 
     if simulate_dut:
