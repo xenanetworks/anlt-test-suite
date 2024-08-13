@@ -261,6 +261,7 @@ async def stop_anlt_on_dut(
         await anlt.anlt_stop(port)
 
         # free the port
+        await asyncio.sleep(1)
         await mgmt.free_port(port)
         
         logger.info(f"----")
@@ -275,9 +276,6 @@ async def abort_test(
     logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
     await anlt.anlt_stop(port)
     logger.info(f"Test aborted")
-
-    # free the port
-    await mgmt.free_port(port)
 
 
 async def connect_reserver_reset(
@@ -485,6 +483,7 @@ async def preset_frame_lock(
     await anlt.anlt_stop(port)
 
     # free the port
+    await asyncio.sleep(1)
     await mgmt.free_port(port)
 
     # print and return result
@@ -546,9 +545,8 @@ async def preset_performance(
     logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
     await anlt.anlt_stop(port)
 
-    await asyncio.sleep(1)
-
     # free the port
+    await asyncio.sleep(1)
     await mgmt.free_port(port)
 
     logger.info(f"Preset Performance Test (OK)")
@@ -695,6 +693,7 @@ async def coeff_boundary_max_min_limit_test(
     await anlt.anlt_stop(port)
 
     # free the port
+    await asyncio.sleep(1)
     await mgmt.free_port(port)
 
     if result:
@@ -796,6 +795,7 @@ async def coeff_boundary_coeff_eq_limit_test(
     await anlt.anlt_stop(port)
 
     # free the port
+    await asyncio.sleep(1)
     await mgmt.free_port(port)
 
     if result:
