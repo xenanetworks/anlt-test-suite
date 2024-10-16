@@ -10,11 +10,11 @@ To measure the link training BER performances of the remote transmitter using th
 Configurations
 -----------------
 
-* Number of ``repetitions``, default to 1
+* Number of ``<repetitions>``, default to 1
 * ANLT Configuration
     * AN enabled/disabled.
-    * ``presets`` the remote transmitter should use.
-    * ``Serdes to test``
+    * ``<preset>`` the remote transmitter should use.
+    * ``<serdes>`` the serdes lane(s) to test
 * Port configuration
     * Interface type, e.g. QSFPDD 100G CR
     * Serdes speed
@@ -22,19 +22,23 @@ Configurations
 
 Procedure
 -----------
-If AN is enabled, test port starts AN + interactive LT.
 
-AN Phase:
+1. If AN is enabled, test port starts AN + interactive LT. Else, start interactive LT on the port.
 
-1. If AN result is ``AN_GOOD_CHECK``, continue to LT Phase.
-2. If AN result is not ``AN_GOOD_CHECK``, quit the test and report AN failure with the AN status.
+2. AN Phase
 
-LT Phase:
+    * 2.1. If AN result is ``AN_GOOD_CHECK``, continue to LT Phase.
+    * 2.2. If AN result is not ``AN_GOOD_CHECK``, quit the test and report AN failure with the AN status.
 
-3. Request the remote transmitter to use a ``preset`` on each specified Serdes.
-4. Read frame lock status of each specified Serdes.
-5. Read ``LT BER`` each specified Serdes.
-6. Announce trained on all Serdes to close LT.
+3. LT Phase:
+
+    * 3.1. Request the remote transmitter to use a ``<preset>`` on each specified Serdes.
+    * 3.2. Read frame lock status of each specified Serdes.
+    * 3.3. Read ``LT BER`` each specified Serdes.
+    * 3.4. Announce trained on all Serdes to close LT.
+
+4. Stop AN and LT on the test port.
+5. Repeat 1-4 until all ``<repetitions>`` are done.
 
 Statistics
 ---------------
