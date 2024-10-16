@@ -15,8 +15,7 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../'))
 
-# import pkg_resources
-
+import datetime
 import codecs
 import os.path
 
@@ -43,10 +42,14 @@ def get_short_version(rel_path):
 
 # -- Project information -----------------------------------------------------
 
-project = u'Xena ANLT Test Suite'
-copyright = u'2024, Teledyne LeCroy'
-author = u'Teledyne LeCroy'
-title = u'Xena ANLT Test Suite'
+company = f"Teledyne LeCroy Xena"
+year = datetime.datetime.today().year
+month = datetime.datetime.today().month
+project = f"Xena Tech Docs"
+copyright = f"{year}, {company}"
+author = company
+title = f"Xena ANLT Test Suite"
+output_basename = f"xena_anlt_test_suite_doc"
 
 # The full version, including alpha/beta/rc tags.
 release = get_version("../../scripts/__init__.py")
@@ -106,6 +109,8 @@ extensions = [
     "sphinx_inline_tabs",
     'sphinx_copybutton',
     "sphinx_remove_toctrees",
+    'sphinx_rtd_theme',
+    'sphinxcontrib.googleanalytics',
 ]
 
 # -- autodoc configuration
@@ -145,10 +150,10 @@ autosectionlabel_prefix_document = True
 # -- Options for HTML output -----------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.
-html_theme = 'furo'
+html_theme = 'sphinx_rtd_theme'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'xena_anlt_test_suite_doc'
+htmlhelp_basename = output_basename
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -165,26 +170,46 @@ html_favicon = './_static/xoa_favicon_16.png'
 html_static_path = ['_static']
 
 # If true, “(C) Copyright …” is shown in the HTML footer.
-html_show_copyright = True
+# html_show_copyright = True
 
 # If true, “Created using Sphinx” is shown in the HTML footer
-html_show_sphinx = False
+# html_show_sphinx = False
 
-html_theme_options = {
-    "light_logo": "tlc_c1.png",
-    "dark_logo": "tlc_c1.png",
-    "source_repository": "https://github.com/xenanetworks/anlt-test-suite",
-    "light_css_variables": {
-        "color-brand-primary": "#0076c0",
-        "color-brand-content": "#0076c0",
-    },
-    "navigation_with_keys": True,
-}
+# html_theme_options = {
+#     "light_logo": "tlc_c1.png",
+#     "dark_logo": "tlc_c1.png",
+#     "source_repository": "https://github.com/xenanetworks/anlt-test-suite",
+#     "light_css_variables": {
+#         "color-brand-primary": "#0076c0",
+#         "color-brand-content": "#0076c0",
+#     },
+#     "navigation_with_keys": True,
+# }
 
 # If true, the index is generated twice: once as a single page with all the entries, 
 # and once as one page per starting letter. Default is False.
-html_split_index = True
+# html_split_index = True
 
+# Theme config for sphinx_rtd_theme
+html_show_sphinx =  False
+html_show_sourcelink = False
+html_logo = './_static/tlc_w1.png'
+html_context = {
+    "display_github": False
+}
+html_theme_options = {
+    'analytics_anonymize_ip': False,
+    'flyout_display': 'hidden',
+    'version_selector': True,
+    'language_selector': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    'vcs_pageview_mode': 'view',
+    'style_nav_header_background': '#0076c0',
+    'navigation_depth': 3,
+}
+googleanalytics_enabled = True
+googleanalytics_id = 'G-3B4BJE8D9D'
 
 # -- Options for Texinfo output -----------------------------------------------------
 
@@ -200,7 +225,7 @@ intersphinx_disabled_domains = ['std']
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'xena_anlt_test_suite_doc', title, author, 'xena_anlt_test_suite_doc', 'Xena ANLT Test Suite', 'Miscellaneous'),
+    (master_doc, output_basename, title, author, output_basename, title, 'Miscellaneous'),
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -228,19 +253,19 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [(master_doc, 'xena_anlt_test_suite_doc.tex', title, author, 'manual'),
+latex_documents = [(master_doc, f"{output_basename}.tex", title, author, 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = './_static/pdf_logo.png'
+latex_logo = './_static/tlc_pdf.png'
 
 # -- Options for manual page output -----------------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'xena_anlt_test_suite_doc', title, [author], 1)
+    (master_doc, output_basename, title, [author], 1)
 ]
 
 
@@ -250,7 +275,7 @@ epub_author = author
 epub_publisher = 'https://xenanetworks.com'
 epub_copyright = copyright
 epub_show_urls = 'footnote'
-epub_basename = 'xena_anlt_test_suite_doc'
+epub_basename = output_basename
 
 # Remove auto-generated API docs from sidebars. They take too long to build.
 remove_from_toctrees = ["api_doc/_autosummary/*"]

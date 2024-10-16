@@ -36,6 +36,8 @@ The table below shows an overview of the supported Preset Tests.
     :glob:
     :maxdepth: 1
     
-    *
+    frame_lock_test
+    consistent_frame_lock_test
+    link_performance_test
 
 

@@ -24,4 +24,4 @@ The table below shows an overview of the supported Voltage Limit Tests.
     :glob:
     :maxdepth: 1
     
-    *
+    eq_limit_test

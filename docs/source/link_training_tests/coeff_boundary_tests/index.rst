@@ -36,4 +36,6 @@ The table below shows an overview of the supported Coefficient Boundary Tests.
     :glob:
     :maxdepth: 1
     
-    *
+    max_coeff_limit_test
+    min_coeff_limit_test
+    coeff_eq_limit_test

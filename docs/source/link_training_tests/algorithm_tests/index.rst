@@ -13,5 +13,5 @@ Because link training process requires stricter timing between the protocol mess
     :glob:
     :maxdepth: 1
     
-    *
+    alg0_test
 
