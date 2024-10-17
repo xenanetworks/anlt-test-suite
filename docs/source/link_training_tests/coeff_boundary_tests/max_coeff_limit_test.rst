@@ -15,7 +15,7 @@ Configurations
     * AN enabled/disabled.
     * ``<preset>`` the remote transmitter should start.
     * ``<coefficients>`` of the remote transmitter.
-    * LT control action: **increase**
+    * LT control action: **INCREMENT**
     * ``<serdes>`` the serdes lane(s) to test
 * Port configuration
     * Interface type, e.g. QSFPDD 100G CR
@@ -35,7 +35,7 @@ Procedure
 3. LT Phase:
 
     * 3.1. Request the remote transmitter to use ``<preset>`` on each specified Serdes.
-    * 3.2. Request the remote transmitter to **increase coefficient** on each specified Serdes.
+    * 3.2. Request the remote transmitter to **INCREMENT** coefficient on each specified Serdes.
     * 3.3. If the response is ``COEFF_AT_LIMIT`` or ``COEFF_NOT_SUPPORTED``, then test is OK.
     * 3.4. If the response is  ``EQ_AT_LIMIT`` or ``COEFF_EQ_AT_LIMIT`` or frame lock is lost, then the test is failed.
     * 3.5. Report the response on each specified Serdes.

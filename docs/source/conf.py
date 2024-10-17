@@ -210,6 +210,7 @@ html_theme_options = {
 }
 googleanalytics_enabled = True
 googleanalytics_id = 'G-3B4BJE8D9D'
+html_css_files = ["custom.css"]
 
 # -- Options for Texinfo output -----------------------------------------------------
 
