@@ -400,6 +400,7 @@ async def pam4_preset_framelock(
     # 1. if AN is on, make sure AN_GOOD_CHECK is detected before progressing
     if should_an:
         if not await verify_an_good_check(port=port, timeout=an_good_check_retries, logger=logger):
+            resp = await anlt.lt_trained(port, serdes)
             await abort_test(port, logger)
             return False
 
@@ -407,6 +408,7 @@ async def pam4_preset_framelock(
     try:
         await verify_frame_lock_both_sides(port=port, serdes=serdes, logger=logger, timeout=frame_lock_retries)
     except:
+        resp = await anlt.lt_trained(port, serdes)
         await abort_test(port, logger)
         return False
 
@@ -417,6 +419,7 @@ async def pam4_preset_framelock(
             port=port, serdes=serdes, encoding=enums.LinkTrainEncoding.PAM4
         )
         if resp != enums.LinkTrainCmdResults.SUCCESS:
+            resp = await anlt.lt_trained(port, serdes)
             await abort_test(port, logger)
             return False
     else:
@@ -425,6 +428,7 @@ async def pam4_preset_framelock(
             port=port, serdes=serdes, encoding=enums.LinkTrainEncoding.PAM4_WITH_PRECODING
         )
         if resp != enums.LinkTrainCmdResults.SUCCESS:
+            resp = await anlt.lt_trained(port, serdes)
             await abort_test(port, logger)
             return False
     
@@ -434,6 +438,7 @@ async def pam4_preset_framelock(
         port=port, serdes=serdes, preset=enums.LinkTrainPresets(preset-1)
     )
     if resp != enums.LinkTrainCmdResults.SUCCESS:
+        resp = await anlt.lt_trained(port, serdes)
         await abort_test(port, logger)
         return False
 
@@ -480,6 +485,7 @@ async def preset_frame_lock(
 
     # stop anlt on the port
     logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+    resp = await anlt.lt_trained(port, serdes)
     await anlt.anlt_stop(port)
 
     # free the port
@@ -543,6 +549,7 @@ async def preset_performance(
 
     # stop anlt on the port because we will move to DATA Phase
     logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+    resp = await anlt.lt_trained(port, serdes)
     await anlt.anlt_stop(port)
 
     # free the port
@@ -690,6 +697,7 @@ async def coeff_boundary_max_min_limit_test(
             pass
 
     logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+    resp = await anlt.lt_trained(port, serdes)
     await anlt.anlt_stop(port)
 
     # free the port
