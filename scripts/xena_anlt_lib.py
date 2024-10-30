@@ -501,7 +501,7 @@ async def prep_procedure(
         try:
             await verify_an_good_check(port=port, timeout=an_good_check_retries, logger=logger)
         except:
-            # await lt_trained_all(port, serdes_count)
+            await lt_trained_all(port, serdes_count)
             await abort_test(port, logger)
             return False
 
