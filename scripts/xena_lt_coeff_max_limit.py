@@ -15,8 +15,8 @@ from xoa_driver import enums
 CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"
 DUT_PORT = "6/0"
-COEFF = "pre2"
-PRESET = 3
+COEFF = "main"
+PRESET = 2
 SIMULATED_DUT = False
 
 async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int, coeff: str, simulate_dut: bool):
@@ -44,7 +44,7 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int,
         port_id=_pid_test,
         username="trainer",
         should_link_recovery=False,
-        should_an=True,
+        should_an=False,
         preset=preset,
         coeff=enums.LinkTrainCoeffs[coeff.upper()],
         logger=logger,
