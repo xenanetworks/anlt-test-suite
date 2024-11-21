@@ -15,8 +15,8 @@ from xoa_driver import enums
 CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"
 DUT_PORT = "6/0"
-COEFF = "pre3"
-PRESET = 3
+COEFF = "main"
+PRESET = 2
 SIMULATED_DUT = False
 
 async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int, coeff: str, simulate_dut: bool):
