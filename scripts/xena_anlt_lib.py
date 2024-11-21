@@ -570,32 +570,34 @@ async def preset_frame_lock(
     await asyncio.sleep(1)
 
     # start prep procedure
-    if not await prep_procedure(
-        logger,
-        port,
-        should_link_recovery,
-        should_an,
-        preset,
-        an_good_check_retries,
-        frame_lock_retries,
-        should_pam4pre,
-        serdes_count
-    ):
+    prep_result = await prep_procedure(logger, port, should_link_recovery, should_an,
+        preset, an_good_check_retries, frame_lock_retries, should_pam4pre, serdes_count)
+    
+    if prep_result == False:
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
         logger.info(f"Preset Frame Lock Test (FAILED)")
+
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+        
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+
         return False
+    else:
+        # stop anlt on the port
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+        logger.info(f"Preset Frame Lock Test (OK)")
 
-    # stop anlt on the port
-    logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
-    await lt_trained_all(port, serdes_count)
-    await anlt.anlt_stop(port)
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
 
-    # free the port
-    await asyncio.sleep(1)
-    await mgmt.free_port(port)
-
-    # print and return result
-    logger.info(f"Preset Frame Lock Test (OK)")
-    return True
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+        
+        return True
 
 
 async def preset_performance(
@@ -623,34 +625,37 @@ async def preset_performance(
     await asyncio.sleep(1)
 
     # start prep procedure
-    if not await prep_procedure(
-        logger,
-        port,
-        should_link_recovery,
-        should_an,
-        preset,
-        an_good_check_retries,
-        frame_lock_retries,
-        should_pam4pre,
-        serdes_count
-    ):
-        logger.info(f"Preset Performance Test (FAILED)")
-        return False
+    prep_result = await prep_procedure(logger, port, should_link_recovery, should_an,
+        preset, an_good_check_retries, frame_lock_retries, should_pam4pre, serdes_count)
     
-    # measure LT BER
-    await lt_status_all(port, serdes_count, logger)
+    if prep_result == False:
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+        logger.info(f"Preset Performance Test (FAILED)")
 
-    # stop anlt on the port because we will move to DATA Phase
-    logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
-    await lt_trained_all(port, serdes_count)
-    await anlt.anlt_stop(port)
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+        
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
 
-    # free the port
-    await asyncio.sleep(1)
-    await mgmt.free_port(port)
+        return False
+    else:
+        # measure LT BER
+        await lt_status_all(port, serdes_count, logger)
 
-    logger.info(f"Preset Performance Test (OK)")
-    return True
+        # stop anlt on the port because we will move to DATA Phase
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+        logger.info(f"Preset Performance Test (OK)")
+
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+
+        return True
 
 
 async def coeff_boundary_max_limit_test(
@@ -679,75 +684,78 @@ async def coeff_boundary_max_limit_test(
     await asyncio.sleep(1)
 
     # start prep procedure
-    if not await prep_procedure(
-        logger,
-        port,
-        should_link_recovery,
-        should_an,
-        preset,
-        an_good_check_retries,
-        frame_lock_retries,
-        should_pam4pre,
-        serdes_count
-    ):
+    prep_result = await prep_procedure(logger, port, should_link_recovery, should_an,
+        preset, an_good_check_retries, frame_lock_retries, should_pam4pre, serdes_count)
+    
+    if prep_result == False:
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
         logger.info(f"Coefficient Maximum Limit Test (FAILED)")
+
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+        
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+        
         return False
+    
+    else:
+        # Request the remote port to inc their tap until limit reached or timeout
+        logger.info(f"Requesting the remote port to increment {coeff.name.upper()} until coeff limit reached or timeout")
+        await asyncio.sleep(1)
 
-    # Request the remote port to inc their tap until limit reached or timeout
-    logger.info(f"Requesting the remote port to increment {coeff.name.upper()} until coeff limit reached or timeout")
-    await asyncio.sleep(1)
-
-    # start the algorithm loop
-    result = False
-    _not_updated_timeout = 0
-    for _ in range(100):
-        logger.warning(f"Request inc on {coeff.name.upper()}")
-        resps = await lt_inc_all(port=port, serdes_count=serdes_count, coeff=coeff)
-        logger.info(resps)
-        if any(resp in resps for resp in (
-            enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
-            )):
-            _not_updated_timeout += 1
-            if _not_updated_timeout > 49:
-                logger.info(f"[COEFF_STS_NOT_UPDATED]")
+        # start the algorithm loop
+        result = False
+        _not_updated_timeout = 0
+        for _ in range(100):
+            logger.warning(f"Request inc on {coeff.name.upper()}")
+            resps = await lt_inc_all(port=port, serdes_count=serdes_count, coeff=coeff)
+            logger.info(resps)
+            if any(resp in resps for resp in (
+                enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
+                )):
+                _not_updated_timeout += 1
+                if _not_updated_timeout > 49:
+                    logger.info(f"[COEFF_STS_NOT_UPDATED]")
+                    result = False
+                    break
+                else:
+                    pass
+            elif any(resp in resps for resp in (
+                enums.LinkTrainCmdResults.TIMEOUT,
+                enums.LinkTrainCmdResults.UNKNOWN,
+                enums.LinkTrainCmdResults.FAILED,
+                enums.LinkTrainCmdResults.COEFF_STS_EQ_LIMIT,
+                enums.LinkTrainCmdResults.COEFF_STS_C_AND_EQ_LIMIT,
+                )):
+                logger.info(f"[TIMEOUT, UNKNOWN, FAILED, COEFF_STS_EQ_LIMIT, COEFF_STS_C_AND_EQ_LIMIT]")
                 result = False
                 break
+            elif all(resp in (
+                enums.LinkTrainCmdResults.COEFF_STS_AT_LIMIT,
+                enums.LinkTrainCmdResults.COEFF_STS_NOT_SUPPORTED,
+                ) for resp in resps):
+                logger.info(f"[COEFF_STS_AT_LIMIT, COEFF_STS_NOT_SUPPORTED]")
+                result = True
+                break
             else:
+                _not_updated_timeout = 0
                 pass
-        elif any(resp in resps for resp in (
-            enums.LinkTrainCmdResults.TIMEOUT,
-            enums.LinkTrainCmdResults.UNKNOWN,
-            enums.LinkTrainCmdResults.FAILED,
-            enums.LinkTrainCmdResults.COEFF_STS_EQ_LIMIT,
-            enums.LinkTrainCmdResults.COEFF_STS_C_AND_EQ_LIMIT,
-            )):
-            logger.info(f"[TIMEOUT, UNKNOWN, FAILED, COEFF_STS_EQ_LIMIT, COEFF_STS_C_AND_EQ_LIMIT]")
-            result = False
-            break
-        elif all(resp in (
-            enums.LinkTrainCmdResults.COEFF_STS_AT_LIMIT,
-            enums.LinkTrainCmdResults.COEFF_STS_NOT_SUPPORTED,
-            ) for resp in resps):
-            logger.info(f"[COEFF_STS_AT_LIMIT, COEFF_STS_NOT_SUPPORTED]")
-            result = True
-            break
+
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+
+        if result:
+            logger.info(f"Coefficient Maximum Limit Test (OK)")
         else:
-            _not_updated_timeout = 0
-            pass
-
-    logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
-    await lt_trained_all(port, serdes_count)
-    await anlt.anlt_stop(port)
-
-    # free the port
-    await asyncio.sleep(1)
-    await mgmt.free_port(port)
-
-    if result:
-        logger.info(f"Coefficient Maximum Limit Test (OK)")
-    else:
-        logger.info(f"Coefficient Maximum Limit Test (FAILED)")
-    return result
+            logger.info(f"Coefficient Maximum Limit Test (FAILED)")
+        return result
 
 
 async def coeff_boundary_min_limit_test(
@@ -776,75 +784,78 @@ async def coeff_boundary_min_limit_test(
     await asyncio.sleep(1)
 
     # start prep procedure
-    if not await prep_procedure(
-        logger,
-        port,
-        should_link_recovery,
-        should_an,
-        preset,
-        an_good_check_retries,
-        frame_lock_retries,
-        should_pam4pre,
-        serdes_count
-    ):
+    prep_result = await prep_procedure(logger, port, should_link_recovery, should_an,
+        preset, an_good_check_retries, frame_lock_retries, should_pam4pre, serdes_count)
+    
+    if prep_result == False:
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
         logger.info(f"Coefficient Minimum Limit Test (FAILED)")
+
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+        
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+
         return False
+    
+    else:
+        # Request the remote port to inc their tap until limit reached or timeout
+        logger.info(f"Requesting the remote port to decrement {coeff.name.upper()} until coeff limit reached or timeout")
+        await asyncio.sleep(1)
 
-    # Request the remote port to inc their tap until limit reached or timeout
-    logger.info(f"Requesting the remote port to decrement {coeff.name.upper()} until coeff limit reached or timeout")
-    await asyncio.sleep(1)
-
-    # start the algorithm loop
-    result = False
-    _not_updated_timeout = 0
-    for _ in range(100):
-        logger.warning(f"Request dec on {coeff.name.upper()}")
-        resps = await lt_dec_all(port=port, serdes_count=serdes_count, coeff=coeff)
-        logger.info(resps)
-        if any(resp in resps for resp in (
-            enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
-            )):
-            _not_updated_timeout += 1
-            if _not_updated_timeout > 49:
-                logger.info(f"[COEFF_STS_NOT_UPDATED]")
+        # start the algorithm loop
+        result = False
+        _not_updated_timeout = 0
+        for _ in range(100):
+            logger.warning(f"Request dec on {coeff.name.upper()}")
+            resps = await lt_dec_all(port=port, serdes_count=serdes_count, coeff=coeff)
+            logger.info(resps)
+            if any(resp in resps for resp in (
+                enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
+                )):
+                _not_updated_timeout += 1
+                if _not_updated_timeout > 49:
+                    logger.info(f"[COEFF_STS_NOT_UPDATED]")
+                    result = False
+                    break
+                else:
+                    pass
+            elif any(resp in resps for resp in (
+                enums.LinkTrainCmdResults.TIMEOUT,
+                enums.LinkTrainCmdResults.UNKNOWN,
+                enums.LinkTrainCmdResults.FAILED,
+                enums.LinkTrainCmdResults.COEFF_STS_EQ_LIMIT,
+                enums.LinkTrainCmdResults.COEFF_STS_C_AND_EQ_LIMIT,
+                )):
+                logger.info(f"[TIMEOUT, UNKNOWN, FAILED, COEFF_STS_EQ_LIMIT, COEFF_STS_C_AND_EQ_LIMIT]")
                 result = False
                 break
+            elif all(resp in (
+                enums.LinkTrainCmdResults.COEFF_STS_AT_LIMIT,
+                enums.LinkTrainCmdResults.COEFF_STS_NOT_SUPPORTED,
+                ) for resp in resps):
+                logger.info(f"[COEFF_STS_AT_LIMIT, COEFF_STS_NOT_SUPPORTED]")
+                result = True
+                break
             else:
+                _not_updated_timeout = 0
                 pass
-        elif any(resp in resps for resp in (
-            enums.LinkTrainCmdResults.TIMEOUT,
-            enums.LinkTrainCmdResults.UNKNOWN,
-            enums.LinkTrainCmdResults.FAILED,
-            enums.LinkTrainCmdResults.COEFF_STS_EQ_LIMIT,
-            enums.LinkTrainCmdResults.COEFF_STS_C_AND_EQ_LIMIT,
-            )):
-            logger.info(f"[TIMEOUT, UNKNOWN, FAILED, COEFF_STS_EQ_LIMIT, COEFF_STS_C_AND_EQ_LIMIT]")
-            result = False
-            break
-        elif all(resp in (
-            enums.LinkTrainCmdResults.COEFF_STS_AT_LIMIT,
-            enums.LinkTrainCmdResults.COEFF_STS_NOT_SUPPORTED,
-            ) for resp in resps):
-            logger.info(f"[COEFF_STS_AT_LIMIT, COEFF_STS_NOT_SUPPORTED]")
-            result = True
-            break
+
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+
+        if result:
+            logger.info(f"Coefficient Minimum Limit Test (OK)")
         else:
-            _not_updated_timeout = 0
-            pass
-
-    logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
-    await lt_trained_all(port, serdes_count)
-    await anlt.anlt_stop(port)
-
-    # free the port
-    await asyncio.sleep(1)
-    await mgmt.free_port(port)
-
-    if result:
-        logger.info(f"Coefficient Minimum Limit Test (OK)")
-    else:
-        logger.info(f"Coefficient Minimum Limit Test (FAILED)")
-    return result
+            logger.info(f"Coefficient Minimum Limit Test (FAILED)")
+        return result
 
 
 async def coeff_boundary_coeff_eq_limit_test(
@@ -872,75 +883,78 @@ async def coeff_boundary_coeff_eq_limit_test(
     await reset_freya_port_tx_tap(port, logger)
 
     # start prep procedure
-    if not await prep_procedure(
-        logger,
-        port,
-        should_link_recovery,
-        should_an,
-        preset,
-        an_good_check_retries,
-        frame_lock_retries,
-        should_pam4pre,
-        serdes_count
-    ):
-        logger.info(f"Coefficient & EQ Limit Test (FAILED)")
-        return False
-
-    # Request the remote port to inc their tap until limit reached or timeout
-    logger.info(f"Requesting the remote port to increment {coeff.name.upper()} until COEFF and/or EQ limit reached or timeout")
-    await asyncio.sleep(1)
+    prep_result = await prep_procedure(logger, port, should_link_recovery, should_an,
+        preset, an_good_check_retries, frame_lock_retries, should_pam4pre, serdes_count)
     
-    # start the algorithm loop
-    result = False
-    _not_updated_timeout = 0
-    for _ in range(100):
-        logger.warning(f"Request dec on {coeff.name.upper()}")
-        resps = await lt_dec_all(port=port, serdes_count=serdes_count, coeff=coeff)
-        logger.info(resps)
-        if any(resp in resps for resp in (
-            enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
-            )):
-            _not_updated_timeout += 1
-            if _not_updated_timeout > 49:
-                logger.info(f"[COEFF_STS_NOT_UPDATED]")
+    if prep_result == False:
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+        logger.info(f"Coefficient & EQ Limit Test (FAILED)")
+
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+        
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+
+        return False
+    
+    else:
+        # Request the remote port to inc their tap until limit reached or timeout
+        logger.info(f"Requesting the remote port to increment {coeff.name.upper()} until COEFF and/or EQ limit reached or timeout")
+        await asyncio.sleep(1)
+        
+        # start the algorithm loop
+        result = False
+        _not_updated_timeout = 0
+        for _ in range(100):
+            logger.warning(f"Request dec on {coeff.name.upper()}")
+            resps = await lt_dec_all(port=port, serdes_count=serdes_count, coeff=coeff)
+            logger.info(resps)
+            if any(resp in resps for resp in (
+                enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
+                )):
+                _not_updated_timeout += 1
+                if _not_updated_timeout > 49:
+                    logger.info(f"[COEFF_STS_NOT_UPDATED]")
+                    result = False
+                    break
+                else:
+                    pass
+            elif any(resp in resps for resp in (
+                enums.LinkTrainCmdResults.TIMEOUT,
+                enums.LinkTrainCmdResults.UNKNOWN,
+                enums.LinkTrainCmdResults.FAILED,
+                )):
+                logger.info(f"[TIMEOUT, UNKNOWN, FAILED]")
                 result = False
                 break
+            elif all(resp in (
+                enums.LinkTrainCmdResults.COEFF_STS_AT_LIMIT,
+                enums.LinkTrainCmdResults.COEFF_STS_NOT_SUPPORTED,
+                enums.LinkTrainCmdResults.COEFF_STS_EQ_LIMIT,
+                enums.LinkTrainCmdResults.COEFF_STS_C_AND_EQ_LIMIT,
+                ) for resp in resps):
+                logger.info(f"[COEFF_STS_AT_LIMIT, COEFF_STS_NOT_SUPPORTED, COEFF_STS_EQ_LIMIT, COEFF_STS_C_AND_EQ_LIMIT]")
+                result = True
+                break
             else:
+                _not_updated_timeout = 0
                 pass
-        elif any(resp in resps for resp in (
-            enums.LinkTrainCmdResults.TIMEOUT,
-            enums.LinkTrainCmdResults.UNKNOWN,
-            enums.LinkTrainCmdResults.FAILED,
-            )):
-            logger.info(f"[TIMEOUT, UNKNOWN, FAILED]")
-            result = False
-            break
-        elif all(resp in (
-            enums.LinkTrainCmdResults.COEFF_STS_AT_LIMIT,
-            enums.LinkTrainCmdResults.COEFF_STS_NOT_SUPPORTED,
-            enums.LinkTrainCmdResults.COEFF_STS_EQ_LIMIT,
-            enums.LinkTrainCmdResults.COEFF_STS_C_AND_EQ_LIMIT,
-            ) for resp in resps):
-            logger.info(f"[COEFF_STS_AT_LIMIT, COEFF_STS_NOT_SUPPORTED, COEFF_STS_EQ_LIMIT, COEFF_STS_C_AND_EQ_LIMIT]")
-            result = True
-            break
+        
+        logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
+        await lt_trained_all(port, serdes_count)
+        await anlt.anlt_stop(port)
+
+        # free the port
+        await asyncio.sleep(1)
+        await mgmt.free_port(port)
+
+        if result:
+            logger.info(f"Coefficient EQ Limit Test (OK)")
         else:
-            _not_updated_timeout = 0
-            pass
-    
-    logger.info(f"Stopping ANLT on Xena Port {port.kind.module_id}/{port.kind.port_id}")
-    await lt_trained_all(port, serdes_count)
-    await anlt.anlt_stop(port)
-
-    # free the port
-    await asyncio.sleep(1)
-    await mgmt.free_port(port)
-
-    if result:
-        logger.info(f"Coefficient EQ Limit Test (OK)")
-    else:
-        logger.info(f"Coefficient EQ Limit Test (FAILED)")
-    return result
+            logger.info(f"Coefficient EQ Limit Test (FAILED)")
+        return result
 
 
 #endregion
