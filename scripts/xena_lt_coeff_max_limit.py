@@ -26,7 +26,7 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int,
         format="%(asctime)s  %(message)s",
         level=logging.DEBUG,
         handlers=[
-            logging.FileHandler(filename="lt_coeff_max_min_limit_test.log", mode="a"),
+            logging.FileHandler(filename="lt_coeff_max_limit_test.log", mode="a"),
             logging.StreamHandler()]
         )
 

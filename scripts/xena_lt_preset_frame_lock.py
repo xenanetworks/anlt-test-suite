@@ -24,7 +24,7 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int,
         format="%(asctime)s  %(message)s",
         level=logging.DEBUG,
         handlers=[
-            logging.FileHandler(filename="lt_preset_link_up_test.log", mode="a"),
+            logging.FileHandler(filename="lt_preset_frame_lock_test.log", mode="a"),
             logging.StreamHandler()]
         )
     
