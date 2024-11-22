@@ -7,7 +7,7 @@ This documentation specifies ANLT Test Suite.
 -----------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Table of Content
 
     introduction

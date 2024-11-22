@@ -5,7 +5,7 @@ Maximum Limit Tests
 Objective
 -----------
 
-To make the test port to respond ``COEFF_AT_LIMIT``.
+To make the test port to respond ``COEFF_AT_LIMIT`` when incrementing a coefficient on the remote transmitter.
 
 Configurations
 -----------------
@@ -34,11 +34,12 @@ Procedure
 
 3. LT Phase:
 
-    * 3.1. Request the remote transmitter to use ``<preset>`` on each specified Serdes.
-    * 3.2. Request the remote transmitter to **INCREMENT** coefficient on each specified Serdes.
-    * 3.3. If the response is ``COEFF_AT_LIMIT`` or ``COEFF_NOT_SUPPORTED``, then test is OK.
-    * 3.4. If the response is  ``EQ_AT_LIMIT`` or ``COEFF_EQ_AT_LIMIT`` or frame lock is lost, then the test is failed.
-    * 3.5. Report the response on each specified Serdes.
+    * 3.1. Request the remote transmitter to use ``PAM4`` or ``PAM with Precoding`` modulation.
+    * 3.2. Request the remote transmitter to use ``<preset>`` on each specified Serdes.
+    * 3.3. Request the remote transmitter to **INCREMENT** coefficient on each specified Serdes.
+    * 3.4. If the response is ``COEFF_AT_LIMIT`` or ``COEFF_NOT_SUPPORTED``, then test is OK.
+    * 3.5. If the response is  ``EQ_AT_LIMIT`` or ``COEFF_EQ_AT_LIMIT`` or frame lock is lost, then the test is failed.
+    * 3.6. Report the response on each specified Serdes.
 
 4. Stop AN and LT on the test port.
 5. Repeat 1-4 until all ``<coefficients>`` are tested.

@@ -31,11 +31,12 @@ Procedure
     * 2.2. If AN result is not ``AN_GOOD_CHECK``, quit the test and report AN failure with the AN status.
 
 3. LT Phase:
-
-    * 3.1. Request the remote transmitter to use a ``<preset>`` on each specified Serdes.
-    * 3.2. Read frame lock status of each specified Serdes.
-    * 3.3. Read ``LT BER`` each specified Serdes.
-    * 3.4. Announce trained on all Serdes to close LT.
+    
+    * 3.1. Request the remote transmitter to use ``PAM4`` or ``PAM with Precoding`` modulation.
+    * 3.2. Request the remote transmitter to use a ``<preset>`` on each specified Serdes.
+    * 3.3. Read frame lock status of each specified Serdes.
+    * 3.4. Read ``LT BER`` each specified Serdes.
+    * 3.5. Announce trained on all Serdes to close LT.
 
 4. Stop AN and LT on the test port.
 5. Repeat 1-4 until all ``<repetitions>`` are done.
