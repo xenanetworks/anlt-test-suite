@@ -32,9 +32,10 @@ Procedure
 
 3. LT Phase:
 
-    * 3.1. Request the remote transmitter to use a ``<preset>`` on each specified Serdes.
-    * 3.2. Read frame lock status of each specified Serdes.
-    * 3.3. Announce trained on ``<serdes>`` to close LT.
+    * 3.1. Request the remote transmitter to use ``PAM4`` or ``PAM with Precoding`` modulation.
+    * 3.2. Request the remote transmitter to use a ``<preset>`` on each specified Serdes.
+    * 3.3. Read frame lock status of each specified Serdes.
+    * 3.4. Announce trained on ``<serdes>`` to close LT.
 
 4. Stop AN and LT on the test port.
 5. Repeat 1-4 until all ``<repetitions>`` are done.
