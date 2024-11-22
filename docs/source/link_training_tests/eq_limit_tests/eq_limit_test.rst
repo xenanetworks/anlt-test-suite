@@ -5,7 +5,7 @@ Equalization Limit Test
 Objective
 ------------
 
-To make the test port to respond ``COEFF AND EQ AT LIMIT``.
+To make the test port to respond ``COEFF_AND_EQ_AT_LIMIT``.
 
 Configurations
 ---------------
@@ -32,7 +32,7 @@ LT Phase:
 
 3. Request the remote transmitter to use ``preset`` on each specified Serdes.
 4. Request the remote transmitter to **increase each coefficient by 1** in a **round robin fashion on each specified Serdes**.
-5. If any coefficient's response is ``COEFF AT LIMIT`` or ``COEFF EQ AT LIMIT`` or ``EQ AT LIMIT``, the coefficient should not be incremented any further.
+5. If any coefficient's response is ``COEFF_AT_LIMIT`` or ``COEFF_EQ_AT_LIMIT`` or ``EQ_AT_LIMIT``, the coefficient should not be incremented any further.
 6. Report the last response of each coefficient on each specified Serdes.
 
 .. note::

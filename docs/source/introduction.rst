@@ -30,17 +30,3 @@ Therefore, any LT algorithm should strive to **IMPROVE** the PRBS BER rather tha
 .. figure:: images/prbs_ber.png
 
     LT BER and PRBS BER
-
-
-Adaptive RX and Fixed RX
---------------------------
-
-The BER measurement is taken from the perspective of the local receiver, as depicted in :numref:`adaptive_rx` below. Consequently, the BER value is influenced by the performance of the port's receiver, the quality of the cable, and the behavior of the remote transmitter. Given that the port's RX can dynamically adapt to the received signal, the measured BER may not accurately represent the true signal quality of the remote transmitter. This implies that the BER measured by another port could be worse if its RX is not as proficient as Freya's.
-
-In order to obtain a more accurate assessment of the remote TX, it is advisable for Freya's port to disable automatic adaptation during BER testing.
-
-.. _adaptive_rx:
-
-.. figure:: images/adaptive_rx.png
-
-    LT BER and PRBS BER

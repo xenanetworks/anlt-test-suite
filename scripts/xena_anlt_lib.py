@@ -908,8 +908,8 @@ async def coeff_boundary_coeff_eq_limit_test(
         result = False
         _not_updated_timeout = 0
         for _ in range(100):
-            logger.warning(f"Request dec on {coeff.name.upper()}")
-            resps = await lt_dec_all(port=port, serdes_count=serdes_count, coeff=coeff)
+            logger.warning(f"Request inc on {coeff.name.upper()}")
+            resps = await lt_inc_all(port=port, serdes_count=serdes_count, coeff=coeff)
             logger.info(resps)
             if any(resp in resps for resp in (
                 enums.LinkTrainCmdResults.COEFF_STS_NOT_UPDATED,
