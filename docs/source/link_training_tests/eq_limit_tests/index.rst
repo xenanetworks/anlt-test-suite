@@ -1,4 +1,4 @@
-Voltage Limit Tests (WIP)
+Voltage Limit Tests
 =============================================
 
 The table below shows an overview of the supported Voltage Limit Tests.
