@@ -1,8 +1,8 @@
 =====================================================
-Xena ANLT Test Suite
+ANLT Test Methodology
 =====================================================
 
-This documentation specifies ANLT Test Suite.
+This documentation specifies ANLT Test Methodology.
 
 -----------
 
@@ -11,6 +11,7 @@ This documentation specifies ANLT Test Suite.
     :caption: Table of Content
 
     introduction
+    step_by_step
     link_training_tests/index
 
 

@@ -9,15 +9,21 @@
 ###############################################################
 import asyncio
 import logging
-from xena_anlt_lib import start_anlt_on_dut, preset_frame_lock, stop_anlt_on_dut
+from xena_anlt_lib import preset_frame_lock
 
+#---------------------------
+# GLOBAL PARAMS
+#---------------------------
 CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"
-DUT_PORT = "6/0"
-PRESET = 1
-SIMULATED_DUT = False
+PRESET = 1 # allowed values = 1, 2, 3, 4, 5
+INCLUDE_AUTONEG = False # Do you want autoneg? (Some vendor's equipment cannot separate AN from LT. But since Xena is test equipment, you can choose if you want to include autoneg or not.)
+USE_PAM4PRE = False # Do you want the trainer to request the DUT port to use PAM4 with Precoding? If not, it will only request PAM4.
 
-async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int, simulate_dut: bool):
+#---------------------------
+# xena_lt_preset_frame_lock
+#---------------------------
+async def xena_lt_preset_frame_lock(chassis: str, test_port_str: str, preset: int, include_an: bool, use_pam4pre: bool):
     # configure basic logger
     logger = logging.getLogger(__name__)
     logging.basicConfig(
@@ -30,11 +36,6 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int,
     
     _mid_test = int(test_port_str.split("/")[0])
     _pid_test = int(test_port_str.split("/")[1])
-    _mid_dut = int(dut_port_str.split("/")[0])
-    _pid_dut = int(dut_port_str.split("/")[1])
-
-    if simulate_dut:
-        await start_anlt_on_dut(chassis_ip=chassis, module_id=_mid_dut, port_id=_pid_dut, username="sim_dut", should_link_recovery=False, should_an=False, logger=logger)
 
     await preset_frame_lock(
         logger=logger,
@@ -43,22 +44,18 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int,
         port_id=_pid_test,
         username="trainer",
         should_link_recovery=False,
-        should_an=False,
+        should_an=include_an,
         preset=preset,
         an_good_check_retries=20,
         frame_lock_retries=10,
-        should_pam4pre=False
+        should_pam4pre=use_pam4pre
     )
 
-    if simulate_dut:
-        await stop_anlt_on_dut(chassis_ip=chassis, module_id=_mid_dut, port_id=_pid_dut, username="sim_dut", logger=logger)
-
-
 if __name__ == "__main__":
-    asyncio.run(main(
+    asyncio.run(xena_lt_preset_frame_lock(
         chassis=CHASSIS_IP,
         test_port_str=TEST_PORT,
-        dut_port_str=DUT_PORT,
         preset=PRESET,
-        simulate_dut=SIMULATED_DUT
+        include_an=INCLUDE_AUTONEG,
+        use_pam4pre = USE_PAM4PRE
     ))
