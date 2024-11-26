@@ -6,6 +6,7 @@ Prerequisite
 
 1. Install xoa-driver. Read `install xoa-driver <https://docs.xenanetworks.com/projects/xoa-python-api/en/latest/getting_started/index.html>`_ for details.
 2. Prepare your DUT port. It is recommended that you turn off the ANLT timeout on the DUT port, if possible. This is to make sure that the timeout won't interrupt the automated test.
+3. Download the scripts from `Automated ANLT Test Suite GitHub Repository <https://github.com/xenanetworks/anlt-test-suite>`_
 
 
 Run Test
