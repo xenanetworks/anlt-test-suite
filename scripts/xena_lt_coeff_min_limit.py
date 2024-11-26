@@ -1,25 +1,31 @@
 ###############################################################
 #                                                             #
-#       COEFFICIENT BOUNDARY TEST - MAX/MIN LIMIT TEST        #
+#       COEFFICIENT BOUNDARY TEST - MIN LIMIT TEST            #
 #                                                             #
 # Objective                                                   #
-# To measure the frame lock status of the remote transmitter  #
-# using the specified preset.                                 #
+# To make the test port to respond COEFF_AT_LIMIT when        #
+# decrementing a coefficient on the remote transmitter.       #
 #                                                             #
 ###############################################################
 import asyncio
 import logging
-from xena_anlt_lib import coeff_boundary_min_limit_test, start_anlt_on_dut, stop_anlt_on_dut
+from xena_anlt_lib import coeff_boundary_min_limit_test
 from xoa_driver import enums
 
+#---------------------------
+# GLOBAL PARAMS
+#---------------------------
 CHASSIS_IP = "10.165.136.60"
 TEST_PORT = "3/0"
-DUT_PORT = "6/0"
-COEFF = "main"
-PRESET = 1
-SIMULATED_DUT = False
+COEFF = "main" # allowed values = "pre3 | pre2 | pre | main | post"
+PRESET = 1 # allowed values = 1, 2, 3, 4, 5
+INCLUDE_AUTONEG = False # Do you want autoneg? (Some vendor's equipment cannot separate AN from LT. But since Xena is test equipment, you can choose if you want to include autoneg or not.)
+USE_PAM4PRE = False # Do you want the trainer to request the DUT port to use PAM4 with Precoding? If not, it will only request PAM4.
 
-async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int, coeff: str, simulate_dut: bool):
+#---------------------------
+# xena_lt_coeff_min_limit
+#---------------------------
+async def xena_lt_coeff_min_limit(chassis: str, test_port_str: str, preset: int, coeff: str, include_an: bool, use_pam4pre: bool):
     # configure basic logger
     logger = logging.getLogger(__name__)
     logging.basicConfig(
@@ -32,11 +38,6 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int,
 
     _mid_test = int(test_port_str.split("/")[0])
     _pid_test = int(test_port_str.split("/")[1])
-    _mid_dut = int(dut_port_str.split("/")[0])
-    _pid_dut = int(dut_port_str.split("/")[1])
-
-    if simulate_dut:
-        await start_anlt_on_dut(chassis_ip=chassis, module_id=_mid_dut, port_id=_pid_dut, username="sim_dut", should_link_recovery=False, should_an=False, logger=logger)
 
     await coeff_boundary_min_limit_test(
         chassis_ip=chassis,
@@ -44,25 +45,22 @@ async def main(chassis: str, test_port_str: str, dut_port_str: str, preset: int,
         port_id=_pid_test,
         username="trainer",
         should_link_recovery=False,
-        should_an=False,
+        should_an=include_an,
         preset=preset,
         coeff=enums.LinkTrainCoeffs[coeff.upper()],
         logger=logger,
         an_good_check_retries=20,
         frame_lock_retries=10,
-        should_pam4pre=False
+        should_pam4pre=use_pam4pre
     )
-
-    if simulate_dut:
-        await stop_anlt_on_dut(chassis_ip=chassis, module_id=_mid_dut, port_id=_pid_dut, username="sim_dut", logger=logger)
 
 
 if __name__ == "__main__":
-    asyncio.run(main(
+    asyncio.run(xena_lt_coeff_min_limit(
         chassis=CHASSIS_IP,
         test_port_str=TEST_PORT,
-        dut_port_str=DUT_PORT,
         preset=PRESET,
         coeff=COEFF,
-        simulate_dut=SIMULATED_DUT
+        include_an=INCLUDE_AUTONEG,
+        use_pam4pre = USE_PAM4PRE
         ))
