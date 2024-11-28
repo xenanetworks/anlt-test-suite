@@ -1,4 +1,4 @@
-# Automated ANLT Test Suite
+# ANLT Test Methodology
 
 ## Introduction
 
