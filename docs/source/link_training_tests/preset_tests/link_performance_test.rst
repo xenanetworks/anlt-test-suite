@@ -16,7 +16,7 @@ Configurations
 -----------------
 
 * Number of ``<repetitions>``, default to 1
-* ANLT Configuration
+* AN/LT Configuration
     * AN enabled/disabled.
     * ``<preset>`` the remote transmitter should use.
     * ``<serdes>`` the serdes lane(s) to test
