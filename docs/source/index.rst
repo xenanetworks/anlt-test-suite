@@ -1,8 +1,8 @@
 =====================================================
-ANLT Test Methodology
+AN/LT Test Methodology
 =====================================================
 
-This documentation specifies ANLT Test Methodology.
+This documentation specifies AN/LT Test Methodology.
 
 -----------
 

@@ -4,7 +4,7 @@ Introduction
 Auto-Negotiation in Link Training Test
 ----------------------------------------
 
-In accordance with the IEEE standard, in the event of a failure during the ANLT procedure, the port should initiate the procedure anew, as illustrated in :numref:`an_in_lt` below.
+In accordance with the IEEE standard, in the event of a failure during the AN/LT procedure, the port should initiate the procedure anew, as illustrated in :numref:`an_in_lt` below.
 
 Freya, functioning as a test port, possesses the capability to perform AN and LT as distinct and autonomous processes. Nevertheless, remote ports under test from different vendors may lack this capability. Consequently, when conducting LT tests, the testing port must activate or deactivate AN based on the settings configured on the remote port.
 
