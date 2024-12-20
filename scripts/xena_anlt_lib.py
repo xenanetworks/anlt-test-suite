@@ -340,8 +340,10 @@ async def reset_freya_port_tx_tap(
         port: ports.Z800FreyaPort, 
         logger: logging.Logger
         ):
-    """Reset Xena port Tx tap values
+    """Reset Xena port Tx tap values, and disable ANLT log
     """
+    await anlt.anlt_log_control(port, [])
+    
     # get serdes count on the port
     resp = await port.capabilities.get()
     serdes_cnt = resp.serdes_count
