@@ -7,6 +7,7 @@ This documentation specifies AN/LT Test Methodology.
 -----------
 
 .. toctree::
+    :numbered: 3
     :maxdepth: 3
     :caption: Table of Content
 
