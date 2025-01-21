@@ -76,7 +76,7 @@ async def verify_frame_lock_both_sides(
     # logger.info(f"serdes_count = {serdes_count}")
     tokens = []
     for i in range(serdes_count):
-        tokens.append(port.l1.serdes[i].lt_info.get())
+        tokens.append(port.l1.serdes[i].lt.info.get())
 
     # start timeout loops
     for _ in range(timeout):
